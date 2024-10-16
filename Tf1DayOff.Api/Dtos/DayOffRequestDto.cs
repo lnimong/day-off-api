@@ -31,13 +31,13 @@ public class DayOffRequestDetailsDto
         Id = request.Id;
         Start = request.Start;
         End = request.End;
-        Status = request.Status.ToString();
+        Status = request.Status;
         Comment = request.RequestComment;
     }
 
 
     [JsonConstructor]
-    public DayOffRequestDetailsDto(Guid id, DateTime start, DateTime end, string status, string? comment)
+    public DayOffRequestDetailsDto(Guid id, DateTime start, DateTime end, DayOffRequestStatus status, string? comment)
     {
         Id = id;
         Start = start;
@@ -49,7 +49,7 @@ public class DayOffRequestDetailsDto
     public Guid Id { get; }
     public DateTime Start { get; }
     public DateTime End { get; }
-    public string Status { get; }
+    public DayOffRequestStatus Status { get; }
     public string? Comment { get; }
 }
 

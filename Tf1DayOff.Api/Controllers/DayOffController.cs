@@ -1,14 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
 using Tf1DayOff.Api.Constants;
 using Tf1DayOff.Api.Dtos;
 using Tf1DayOff.App.Commands;
 using Tf1DayOff.App.Queries;
 using Tf1DayOff.Domain.Entities;
+using Tf1DayOff.Domain.Services;
 
 namespace Tf1DayOff.Api.Controllers;
 
@@ -26,19 +23,25 @@ public class DayOffController : ControllerBase
     }
 
     [HttpPost("new-request")]
-    public async Task NewDayOffRequest(DayOffRequestDto requestDto, [FromServices] IServiceProvider serviceProvider)
+    public async Task NewDayOffRequest(DayOffRequestDto requestDto)
     {
         var userId = _http.GetUserIdFromHeader();
-        var command = new RequestDayOffCommand.Params(userId??string.Empty, requestDto.Start, requestDto.End);
+        var command = new RequestDayOffCommand.Params(userId??string.Empty, requestDto.Start, requestDto.End, requestDto.Comment);
         await _sender.Send(command);
     }
 
 
     [HttpPost("validate-request/{requestId}")]
-    public async Task ValidateDayOffRequest(Guid requestId)
+    public async Task ValidateDayOffRequest(Guid requestId, DayOffValidationRequestDto request)
     {
         var userId = _http.GetUserIdFromHeader();
-        var command = new ValidateDayOffCommand.Params(userId ?? string.Empty, requestId);
+        var action = request.Action switch
+        {
+            DayOffValidationAction.Validate => DayOffRequestEvent.Validation,
+            DayOffValidationAction.Reject => DayOffRequestEvent.Refusal,
+            _ => throw new ArgumentOutOfRangeException(nameof(request.Action))
+        };
+        var command = new ValidateDayOffCommand.Params(userId ?? string.Empty, requestId, action, request.Comment);
         await _sender.Send(command);
     }
 
@@ -68,7 +71,7 @@ public class DayOffController : ControllerBase
                 _ => null
             };
 
-private static DayOffRequestStatus? StatusEnum(string? status) =>
+    private static DayOffRequestStatus? StatusEnum(string? status) =>
         status == null ? null : 
             status.ToLower() switch
             {
@@ -78,6 +81,17 @@ private static DayOffRequestStatus? StatusEnum(string? status) =>
                 "rejected" => DayOffRequestStatus.Rejected,
                 _ => null
             };
+}
+
+public class DayOffValidationRequestDto
+{
+    public string Comment { get; set; } = string.Empty;
+    public DayOffValidationAction Action { get; set; }
+}
+
+public enum DayOffValidationAction
+{
+    Validate, Reject
 }
 
 public static class HttpExtensions

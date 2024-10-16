@@ -24,7 +24,7 @@ public class RequestDayOffTests : BaseDayOFfTests
         );
 
         // Act
-        var (response, body) = await Client.TestGet<DayOffRequestDetailsResponseDto>(
+        var (_, body) = await Client.TestGet<DayOffRequestDetailsResponseDto>(
             user: theUser,
             route: Route.GetDayOff);
 

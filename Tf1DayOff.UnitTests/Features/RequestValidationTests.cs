@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using System.Net;
+using Tf1DayOff.Api.Controllers;
 using Tf1DayOff.Domain.Entities;
 using Tf1DayOff.UnitTests.TestInitTools;
 
@@ -24,7 +25,8 @@ public class RequestValidationTests : BaseDayOFfTests
         // Act
         var response = await Client.TestPost(
             user: theOtherUser,
-            route: Route.ValidateRequest(2.AsGuid()));
+            route: Route.ValidateRequest(2.AsGuid()),
+            body: new DayOffValidationRequestDto { Action = DayOffValidationAction.Validate });
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -50,7 +52,8 @@ public class RequestValidationTests : BaseDayOFfTests
         // Act
         var response = await Client.TestPost(
             user: theOtherUser,
-            route: Route.ValidateRequest(2.AsGuid()));
+            route: Route.ValidateRequest(2.AsGuid()),
+            body: new DayOffValidationRequestDto { Action = DayOffValidationAction.Validate });
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

@@ -1,10 +1,13 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tf1DayOff.Api.Constants;
+using Tf1DayOff.Api.Controllers;
 using Tf1DayOff.Api.Dtos;
 
 namespace Tf1DayOff.UnitTests.TestInitTools;
@@ -36,10 +39,24 @@ public static class HttpClientTestsExtension
         var request = new HttpRequestMessage(HttpMethod.Get, route);
         request.Headers.Add(ApiConstants.XUser, user);
         var response = await client.SendAsync(request);
-        return (response, (await response.Content.ReadFromJsonAsync<T>()));
+        
+        return (response, (await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        })));
     }
 
     public static async Task<HttpResponseMessage> TestPost(this HttpClient client, string user, string route, DayOffRequestDto body)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, route);
+        request.Headers.Add(ApiConstants.XUser, user);
+        request.Content = JsonContent.Create(body);
+        var response = await client.SendAsync(request);
+        return response;
+    }
+
+    public static async Task<HttpResponseMessage> TestPost(this HttpClient client, string user, string route, DayOffValidationRequestDto body)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, route);
         request.Headers.Add(ApiConstants.XUser, user);

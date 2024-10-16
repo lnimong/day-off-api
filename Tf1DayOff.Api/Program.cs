@@ -1,4 +1,3 @@
-using System.Reflection;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +9,21 @@ using Tf1DayOff.Domain.Services;
 using Tf1DayOff.Domain.InfraInterfaces;
 using Tf1DayOff.Infra.General;
 using Tf1DayOff.Infra.Repositories;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers(x => x.Filters.Add<ApiExceptionFilterAttribute>());
+builder.Services
+    .AddControllers(x => x.Filters.Add<ApiExceptionFilterAttribute>())
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    }); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(
@@ -33,7 +41,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<RequestDayOffCommand.Handle
 builder.Services.AddSingleton<IClock, CustomClock>();
 builder.Services.AddSingleton<DayOffRequestsService>();
 builder.Services.AddSingleton<IDayOffRequestsRepository, InFileStaticDayOffRequestsRepository>();
-builder.Services.AddSingleton(new FileStorageSettings("/App/data/data.json"));
+
+var path = Environment.GetEnvironmentVariable("DAY_OFF_DATA_PATH");
+
+builder.Services.AddSingleton(new FileStorageSettings( string.IsNullOrEmpty(path) ? "/App/vol/data.json" : path ));
 
 
 var app = builder.Build();

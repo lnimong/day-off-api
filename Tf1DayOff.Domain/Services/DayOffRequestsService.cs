@@ -10,19 +10,20 @@ public class DayOffRequestsService
 
     public DayOffRequestsService(IDayOffRequestsRepository store) => _store = store;
 
-    public async Task AddNewRequest(string userId, DateTime start, DateTime end)
+    public async Task AddNewRequest(string userId, DateTime start, DateTime end, string comment)
     {
         start = start.Date;
         end = end.Date;
         await EnsureNoOverlap(userId, start, end);
         var issue = new DayOffRequest(Guid.NewGuid(), userId, DayOffType.Vacation, start, end);
-        await _store.Save(RequestLifeCycle(Event.Creation, userId, issue));
+        await _store.Save(RequestLifeCycle(DayOffRequestEvent.Creation, userId, issue, comment));
     }
 
-    public async Task ValidateRequest(string validatorId, Guid issueId)
+    //public async Task ValidateRequest(string validatorId, Guid issueId)
+    public async Task ValidateRequest(string validatorId, Guid issueId, DayOffRequestEvent action, string comment, DateTime time)
     {
         var issue = await _store.GetById(issueId);
-        var newIssue = RequestLifeCycle(Event.Validation, validatorId, issue);
+        var newIssue = RequestLifeCycle(action, validatorId, issue, comment);
         await _store.Save(newIssue);
     }
 
@@ -38,22 +39,23 @@ public class DayOffRequestsService
             throw new InvalidUserActionException("Day off request overlaps with existing day off tickets");
     }
 
-    private enum Event
-    {
-        Creation,
-        Validation,
-        Refusal
-    }
-    private DayOffRequest RequestLifeCycle(Event @event, string userId, DayOffRequest request)
+    private DayOffRequest RequestLifeCycle(DayOffRequestEvent dayOffRequestEvent, string userId, DayOffRequest request, string comment)
     {
         // lifecycle/state machine 
         // see figure 4 in https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/may/csharp-8-0-pattern-matching-in-csharp-8-0#expressing-patterns
-        return (creation: @event, request.Status) switch
+        return (creation: dayOffRequestEvent, request.Status) switch
         {
-            (Event.Creation, DayOffRequestStatus.New) => request with { Status = DayOffRequestStatus.Pending, StatusUpdatedBy = userId },
-            (Event.Validation, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Accepted, StatusUpdatedBy = userId },
-            (Event.Refusal, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Rejected, StatusUpdatedBy = userId }, // here just to get a better idea of what and entity state machine could look like
-            _ => throw new InvalidUserActionException($"cannot apply ${@event} on request {request.UserId} with status {request.Status}")
+            (DayOffRequestEvent.Creation, DayOffRequestStatus.New) => request with { Status = DayOffRequestStatus.Pending, StatusUpdatedBy = userId, RequestComment = comment },
+            (DayOffRequestEvent.Validation, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Accepted, StatusUpdatedBy = userId, StatusUpdateComment = comment },
+            (DayOffRequestEvent.Refusal, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Rejected, StatusUpdatedBy = userId, StatusUpdateComment = comment }, 
+            _ => throw new InvalidUserActionException($"cannot apply ${dayOffRequestEvent} on request {request.UserId} with status {request.Status}")
         };
     }
+}
+
+public enum DayOffRequestEvent
+{
+    Creation,
+    Validation,
+    Refusal
 }
