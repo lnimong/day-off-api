@@ -33,19 +33,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<RequestDayOffCommand.Handle
 builder.Services.AddSingleton<IClock, CustomClock>();
 builder.Services.AddSingleton<DayOffRequestsService>();
 builder.Services.AddSingleton<IDayOffRequestsRepository, InFileStaticDayOffRequestsRepository>();
-builder.Services.AddSingleton(new FileStorageSettings("C:\\_\\r\\t\\day-off\\data.json"));
+builder.Services.AddSingleton(new FileStorageSettings("/App/data/data.json"));
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthorization();
 
