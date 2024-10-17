@@ -83,17 +83,6 @@ public class DayOffController : ControllerBase
             };
 }
 
-public class DayOffValidationRequestDto
-{
-    public string Comment { get; set; } = string.Empty;
-    public DayOffValidationAction Action { get; set; }
-}
-
-public enum DayOffValidationAction
-{
-    Validate, Reject
-}
-
 public static class HttpExtensions
 {
     public static string? GetUserIdFromHeader(this IHttpContextAccessor http)
