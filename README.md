@@ -26,7 +26,11 @@ in the example above the app will respond on **http://localhost:8888** and the d
 -  [dotnet runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) is installed
 
 ### steps
-1 - run the api from the repository root directory
+1 - run tests from the repository root directory
+```
+ dotnet test
+```
+2 - run the api from the repository root directory
 ```
  dotnet run --project .\Tf1DayOff.Api
 ```
