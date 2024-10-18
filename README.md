@@ -37,14 +37,64 @@ in the example above the app will respond on **http://localhost:8888** and the d
 ---------------------------------------------
 ---------------------------------------------
 # IMPLEMENTATION CHOICES
-- The Api is supposed to be RESTFul meaning the routes are organized by entities and usually  the enities state may be managed using http verb (POST/PUT/DELETE...). thus the name **REpresentational State Transfer**
+### The Api is supposed to be RESTFul...
+- ...meaning the routes are organized by entities and usually  the enities state may be managed using http verb (POST/PUT/DELETE...). thus the name **REpresentational State Transfer**
 - I chose to tweak it a bit. By keeping the organization by entities, but instead of sending the full state when an update is requested (using PUT), I rather send an object representing the update requested (a Command).
-- this is inspired by CQRS. which is a way to organize the code by seggregating  commands an queries
+- this is inspired by **CQRS**. which is a way to organize the code by seggregating  commands an queries
 - one of the advantages is to (1) clearly identify the usecases and (2) avoid unwanted updates by not exposing the entity state when there is no need to do so.
-- also a clear idea of the usecases is quite necessary when applying DDD principles 
+- also a clear idea of the usecases is quite necessary when applying **DDD** principles 
 - I used MediaTR to accelearate the setup of my commands and queries
 - In our code the only entity we have is the DayOffRequest
 - the DayOffRequest lifecycle is explicitly implemented inthe **DayOffRequestsService** class and looks like this
   ![state diagram](./day-off-state.png)
 - The User should also be an entity but we chose to limit our time spend on the project
- 
+
+
+ - For the testing part...
+ - ...to gain time, end ensure the API works (not just some part of it), I chose to have my entire Api as my system under test. Meaning, for each automated test, the api setup code is also triggered.
+```
+// WebApplicationFactory.cs
+    public static HttpClient CreateHttpClientFor<TProgram>(Action<IWebHostBuilder>? registerMock = null)  where TProgram : class
+    {
+        var factory = new WebApplicationFactory<TProgram>()
+            .WithWebHostBuilder(builder =>
+            {
+                //Environment.SetEnvironmentVariable...
+
+                builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+                {
+                    //configurationBuilder.AddJsonFile...
+                });
+
+
+                builder.ConfigureTestServices(services =>
+                {
+                    //services.AddAuthentication(options => ...);
+                });
+
+                registerMock?.Invoke(builder);
+            });
+
+        return factory.CreateClient();
+    }
+```
+ - it means that classes like Error management (ExceptionFilters), Middelware are also tested
+ - That allows me to actually check the api return codes (400, 404, 500 ...)
+ - note that there is no actual http calls and it is stil possible to setup Mocks (usefull to handle Time or Data access)
+
+```
+// BaseDayOFfTests.cs
+[SetUp]
+public void Setup()
+{
+    FakeClock = Substitute.For<IClock>();
+    Repository = new InMemStaticDayOffRequestsRepository();
+
+    Client = HttpClientFactory.CreateHttpClientFor<Tf1DayOFf.Api.Program>(
+        registerMock: x =>
+        {
+            x.MockDependency(FakeClock);
+            x.MockDependency<IDayOffRequestsRepository>(Repository);
+        });
+}
+```
