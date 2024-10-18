@@ -36,6 +36,84 @@ in the example above the app will respond on **http://localhost:8888** and the d
 ```
 ---------------------------------------------
 ---------------------------------------------
+# ENDPOINTS
+
+### POST https://localhost:7114/day-off/new-request
+
+```
+curl -X 'POST' \
+  'https://localhost:7114/day-off/new-request' \
+  -H 'accept: */*' \
+  -H 'X-User: the_user' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "type": "Sick",
+  "comment": "string",
+  "start": "2024-10-18T12:24:44.788Z",
+  "end": "2024-10-18T12:24:44.788Z"
+}'
+```
+creates a new day off request
+the user who creates the request is passed as a header (X-User)
+
+#### body
+the request details
+- type : possible Values are "Sick" or "Vacation"
+- comment :  a string that add complementary details to the request
+- start : the start date of the request
+- end : the end date of the request
+
+
+
+
+### POST https://localhost:7114/day-off/validate-request/56a42cdd-2647-4f8f-b162-74e3a4a25457
+
+```
+curl -X 'POST' \
+  'https://localhost:7114/day-off/validate-request/56a42cdd-2647-4f8f-b162-74e3a4a25457' \
+  -H 'accept: */*' \
+  -H 'X-User: the_user' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "comment": "string",
+  "action": "Validate"
+}'
+```
+validate a new day off request
+the user who validate the request is passed as a header (X-User)
+
+#### the route param 
+it is a GUID which is the id of the request to be updated
+
+#### the body :
+the validation details
+- comment :  a string that add complementary details to the request validation (or refusal)
+- action : possible values are "Validate" or "Reject"
+
+
+
+
+### GET https://localhost:7114/day-off?status=Pending&status=Accepted&type=Sick&type=Vacation
+```
+curl -X 'GET' \
+  'https://localhost:7114/day-off?status=Pending&status=Accepted&type=Sick&type=Vacation' \
+  -H 'accept: text/plain' \
+  -H 'X-User: the_user'
+```
+
+retrieve the list of day off requests for the current user
+the current user is passed as a header (X-User)
+
+#### query params
+status : the status filter (non mandatory)
+- possible Values are  "New", "Pending", "Accepted", "Rejected" (non case sensitive)
+type : the type filter (non mandatory)
+- possible Values are "Sick" or "Vacation" (non case sensitive)
+
+---------------------------------------------
+---------------------------------------------
+
+
 # IMPLEMENTATION CHOICES
 ### The Api is supposed to be RESTFul...
 - ...meaning the routes are organized by entities and usually  the enities state may be managed using http verb (POST/PUT/DELETE...). thus the name **REpresentational State Transfer**
