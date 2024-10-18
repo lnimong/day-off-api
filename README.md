@@ -41,6 +41,6 @@ in the example above the app will respond on **http://localhost:8888** and the d
 - I used MediaTR to accelearate the setup of my commands and queries
 - In our code the only entity we have is the DayOffRequest
 - the DayOffRequest lifecycle is explicitly implemented inthe **DayOffRequestsService** class and looks like this
-  [state diagram](./day-off-state.png)
+  ![state diagram](./day-off-state.png)
 - The User should also be an entity but we chose to limit our time spend on the project
  
