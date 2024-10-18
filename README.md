@@ -50,7 +50,7 @@ in the example above the app will respond on **http://localhost:8888** and the d
 - The User should also be an entity but we chose to limit our time spend on the project
 
 
- - For the testing part...
+### For the testing part...
  - ...to gain time, end ensure the API works (not just some part of it), I chose to have my entire Api as my system under test. Meaning, for each automated test, the api setup code is also triggered.
 ```
 // WebApplicationFactory.cs
