@@ -124,6 +124,15 @@ type : the type filter (non mandatory)
 - I used MediaTR to accelearate the setup of my commands and queries
 - In our code the only entity we have is the DayOffRequest
 - the DayOffRequest lifecycle is explicitly implemented inthe **DayOffRequestsService** class and looks like this
+```
+        return (creation: dayOffRequestEvent, request.Status) switch
+        {
+            (DayOffRequestEvent.Creation, DayOffRequestStatus.New) => request with { Status = DayOffRequestStatus.Pending, StatusUpdatedBy = userId, RequestComment = comment },
+            (DayOffRequestEvent.Validation, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Accepted, StatusUpdatedBy = userId, StatusUpdateComment = comment },
+            (DayOffRequestEvent.Refusal, DayOffRequestStatus.Pending) => request with { Status = DayOffRequestStatus.Rejected, StatusUpdatedBy = userId, StatusUpdateComment = comment }, 
+            _ => throw new InvalidUserActionException($"cannot apply ${dayOffRequestEvent} on request {request.UserId} with status {request.Status}")
+        };
+```
   ![state diagram](./day-off-state.png)
 - The User should also be an entity but I chose to limit the time spent on the project
 
