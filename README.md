@@ -125,11 +125,11 @@ type : the type filter (non mandatory)
 - In our code the only entity we have is the DayOffRequest
 - the DayOffRequest lifecycle is explicitly implemented inthe **DayOffRequestsService** class and looks like this
   ![state diagram](./day-off-state.png)
-- The User should also be an entity but we chose to limit our time spend on the project
+- The User should also be an entity but I chose to limit the time spent on the project
 
 
 ### For the testing part...
- - ...to gain time, end ensure the API works (not just some part of it), I chose to have my entire Api as my system under test. Meaning, for each automated test, the api setup code is also triggered.
+ - ...to gain time, and ensure the API works (not just some part of it), I chose to have my entire Api as my system under test. Meaning, for each automated test, the api setup code is also triggered.
 ```
 // WebApplicationFactory.cs
     public static HttpClient CreateHttpClientFor<TProgram>(Action<IWebHostBuilder>? registerMock = null)  where TProgram : class
