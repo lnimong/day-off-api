@@ -10,7 +10,7 @@ namespace Tf1DayOff.App.Commands;
 
 public static class RequestDayOffCommand
 {
-    public record Params(string UserId, DateTime Start, DateTime End, string Comment) : IRequest;
+    public record Params(string UserId, DateTime Start, DateTime End, string Comment, DayOffType Type) : IRequest;
 
     public class Validator : AbstractValidator<Params>
     {
@@ -37,7 +37,7 @@ public static class RequestDayOffCommand
 
         public async Task Handle(Params request, CancellationToken cancellationToken)
         {
-            await _requestsSvc.AddNewRequest(request.UserId, request.Start, request.End, request.Comment);
+            await _requestsSvc.AddNewRequest(request.UserId, request.Start, request.End, request.Comment, request.Type);
         }
     }
 }

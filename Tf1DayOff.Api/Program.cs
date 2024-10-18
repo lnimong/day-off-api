@@ -1,3 +1,4 @@
+using System.Reflection;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,10 @@ builder.Services
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(
-    x => x.OperationFilter<AddRequiredHeaderParameter>()
-);
+    x =>
+    {
+        x.OperationFilter<AddRequiredHeaderParameter>();
+    });
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMediatR(cfg =>

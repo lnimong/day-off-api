@@ -22,15 +22,39 @@ public class DayOffController : ControllerBase
         _sender = sender;
     }
 
+
+    /// <summary>
+    /// creates a new day off request
+    /// the user who creates the request is passed as a header (X-User)
+    /// </summary>
+    /// <param name="requestDto">
+    /// the request details
+    /// - type : possible Values are "Sick" or "Vacation"
+    /// - comment :  a string that add complementary details to the request
+    /// - start : the start date of the request
+    /// - end : the end date of the request
+    /// </param>
+    /// <returns></returns>
     [HttpPost("new-request")]
     public async Task NewDayOffRequest(DayOffRequestDto requestDto)
     {
         var userId = _http.GetUserIdFromHeader();
-        var command = new RequestDayOffCommand.Params(userId??string.Empty, requestDto.Start, requestDto.End, requestDto.Comment);
+        var command = new RequestDayOffCommand.Params(userId??string.Empty, requestDto.Start, requestDto.End, requestDto.Comment, requestDto.Type);
         await _sender.Send(command);
     }
 
-
+    /// <summary>
+    /// validate a new day off request
+    /// the user who validate the request is passed as a header (X-User)
+    /// </summary>
+    /// <param name="requestId">the id of the request to be validated</param>
+    /// <param name="request">
+    /// the validation details
+    /// - comment :  a string that add complementary details to the request validation (or refusal)
+    /// - action : possible values are "Validate" or "Reject"
+    /// </param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     [HttpPost("validate-request/{requestId}")]
     public async Task ValidateDayOffRequest(Guid requestId, DayOffValidationRequestDto request)
     {
@@ -45,7 +69,12 @@ public class DayOffController : ControllerBase
         await _sender.Send(command);
     }
 
-
+    /// <summary>
+    /// retrieve the list of day off requests for the current user
+    /// </summary>
+    /// <param name="status">the status filter (non mandatory)</param>
+    /// <param name="type">the type filter (non mandatory)</param>
+    /// <returns></returns>
     [HttpGet]
     public async Task<DayOffRequestDetailsResponseDto> GetDayOffRequests([FromQuery]string?[] status, [FromQuery]string?[] type)
     {

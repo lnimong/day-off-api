@@ -10,12 +10,12 @@ public class DayOffRequestsService
 
     public DayOffRequestsService(IDayOffRequestsRepository store) => _store = store;
 
-    public async Task AddNewRequest(string userId, DateTime start, DateTime end, string comment)
+    public async Task AddNewRequest(string userId, DateTime start, DateTime end, string comment, DayOffType type)
     {
         start = start.Date;
         end = end.Date;
         await EnsureNoOverlap(userId, start, end);
-        var issue = new DayOffRequest(Guid.NewGuid(), userId, DayOffType.Vacation, start, end);
+        var issue = new DayOffRequest(Guid.NewGuid(), userId, type, start, end);
         await _store.Save(RequestLifeCycle(DayOffRequestEvent.Creation, userId, issue, comment));
     }
 
