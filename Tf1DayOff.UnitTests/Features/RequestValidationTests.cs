@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using System.Net;
 using Tf1DayOff.Api.Controllers;
+using Tf1DayOff.Api.Dtos;
 using Tf1DayOff.Domain.Entities;
 using Tf1DayOff.UnitTests.TestInitTools;
 
